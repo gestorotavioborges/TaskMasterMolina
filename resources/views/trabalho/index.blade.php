@@ -1,48 +1,75 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">  
-    
-</head>
-<body>
-    <div class="container">
-        <div class="row">
-            <div class="col12 my-5 mb-5">
-                <div class="border-bottom d-flex justify-content-between align items-center">
-                    <h2>Trabalhos não concluidos</h2>
-                    <a href="{{ route('trabalho.create')}}" class="btn btn-primary">Cadastrar Trabalhos e Tarefas</a>
-                </div>
-                <table class="table table-hover table-striped mt-5">
-                    <thead>
-                        <tr>
-                            <th>Nome</th>
-                            <th>Descrição</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody> 
-                        @foreach($trabalhos as $trabalho)
-                            <tr>
-                                <td>{{ $trabalho->name }}</td>
-                                <td>{{ $trabalho->description }}</td>
-                                <td>
-                                    <button>Editar</button>
-                                    <button>Excluir</button>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+@extends('layout')
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
-    
-</body>
-</html>
+@section('conteudo')
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="card-title m-0">Lista de Tarefas Pendentes</h3>
+    <a href="{{ route('trabalho.create') }}" class="btn btn-success">
+        <i class="bi bi-plus-lg"></i> Nova Tarefa
+    </a>
+</div>
+
+@if($trabalhos->count() > 0)
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Prioridade</th>
+                    <th>Prazo</th>
+                    <th>Tarefa</th>
+                    <th>Descrição</th>
+                    <th class="text-end">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($trabalhos as $t)
+                <tr class="{{ $t->due_date < now() ? 'table-danger' : '' }}">
+                    <td>
+                        @if($t->priority == 'alta')
+                            <span class="badge bg-danger">Alta</span>
+                        @elseif($t->priority == 'media')
+                            <span class="badge bg-warning text-dark">Média</span>
+                        @else
+                            <span class="badge bg-success">Baixa</span>
+                        @endif
+                    </td>
+                    <td class="{{ $t->due_date < now() ? 'fw-bold text-danger' : '' }}">
+                        {{ $t->due_date ? $t->due_date->format('d/m/Y') : '-' }}
+                        @if($t->due_date < now()) <i class="bi bi-exclamation-circle-fill ms-1" title="Atrasado!"></i> @endif
+                    </td>
+                    <td class="fw-bold">{{ $t->name }}</td>
+                    <td>{{ Str::limit($t->description, 40) }}</td>
+                    
+                    <td class="text-end">
+                        <form action="{{ route('trabalho.marcarConcluido', $t->id) }}" method="POST" class="d-inline">
+                            @csrf
+                            @method('PATCH')
+                            <button type="submit" class="btn btn-sm btn-success" title="Concluir Tarefa">
+                                <i class="bi bi-check-lg"></i>
+                            </button>
+                        </form>
+
+                        <a href="{{ route('trabalho.edit', $t->id) }}" class="btn btn-sm btn-warning text-white" title="Editar">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
+
+                        <form action="{{ route('trabalho.destroy', $t->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem certeza que deseja excluir?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-sm btn-danger" title="Excluir">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+@else
+    <div class="text-center py-5">
+        <p class="text-muted">Nenhuma tarefa pendente. Tudo em dia! 😎</p>
+        <a href="{{ route('trabalho.create') }}" class="btn btn-outline-primary">Cadastrar Nova Tarefa</a>
+    </div>
+@endif
+@endsection
+

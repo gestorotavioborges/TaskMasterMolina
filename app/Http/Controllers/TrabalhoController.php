@@ -4,66 +4,96 @@ namespace App\Http\Controllers;
 
 use App\Models\Trabalho;
 use Illuminate\Http\Request;
+use App\Http\Requests\TrabalhoRequest;
 
 class TrabalhoController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        $trabalho = trabalho::all();
+        $trabalho = Trabalho::where('is_done', false)
+            ->orderBy('due_date', 'asc')
+            ->get();
         
-        return view('trabalho.index',['trabalhos' => $trabalho]);
+        return view('trabalho.index', ['trabalhos' => $trabalho]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    public function concluidos()
+    {
+        $trabalho = Trabalho::where('is_done', true)->get();
+        return view('trabalho.concluidos', ['trabalhos' => $trabalho]);
+    }
+
     public function create()
     {
         return view('trabalho.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(TrabalhoRequest $request)
     {
-        $validacao = $request->validate([
-            'name' => 'required|string|min:8',
-            'description' => 'required|string|min:15']); 
+        $trabalho = Trabalho::create([
+            'name' => $request['name'],
+            'description' => $request['description'],
+            'priority' => $request['priority'],
+            'due_date' => $request['due_date'],
+            'is_done' => false
+        ]);
+
+        if($trabalho) {
+            return redirect()->route('trabalho.index')->with('success', 'Tarefa cadastrada com sucesso!!!');
+        } else {
+            return redirect()->route('trabalho.index')->with('error', 'Não foi possível cadastrar a tarefa.');
+        }   
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Trabalho $trabalho)
+    public function edit($id)
     {
-        //
+        $trabalho = Trabalho::findOrFail($id);
+        return view('trabalho.update', ['trabalho' => $trabalho]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Trabalho $trabalho)
+    public function update(TrabalhoRequest $request, $id)
     {
-        //
+        $trabalho = Trabalho::findOrFail($id);
+
+        $atualizou = $trabalho->update([
+            'name' => $request['name'],
+            'description' => $request['description'],
+            'priority' => $request['priority'],
+            'due_date' => $request['due_date']
+        ]);
+
+        if($atualizou) {
+            return redirect()->route('trabalho.index')->with('success', 'Tarefa atualizada com sucesso!!!');
+        } else {
+            return redirect()->route('trabalho.index')->with('error', 'Não foi possível atualizar a tarefa.');
+        }   
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Trabalho $trabalho)
+    public function destroy($id)
     {
-        //
+        $trabalho = Trabalho::findOrFail($id);
+        $deletou = $trabalho->delete();
+
+        if($deletou) {
+            return redirect()->back()->with('success', 'Tarefa removida com sucesso!!!');
+        } else {
+            return redirect()->back()->with('error', 'Não foi possível remover a tarefa.');
+        }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Trabalho $trabalho)
+    public function marcarConcluido($id)
     {
-        //
+        $trabalho = Trabalho::findOrFail($id);
+        $trabalho->update(['is_done' => true]);
+
+        return redirect()->route('trabalho.index')->with('success', 'Parabéns! Tarefa concluída.');
+    }
+
+    public function reabrir($id)
+    {
+        $trabalho = Trabalho::findOrFail($id);
+        $trabalho->update(['is_done' => false]);
+
+        return redirect()->route('trabalho.concluidos')->with('success', 'Tarefa reaberta.');
     }
 }

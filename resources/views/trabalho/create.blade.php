@@ -1,65 +1,60 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">  
-    
-</head>
-<body>
-    <div class="container">
-        <div class="row">
-            <div class="col8 my-5 mb-5">
-                <div class="border-bottom d-flex justify-content-between align items-center">
-                    <h2>Cadastro de trabalhos a fazer</h2>
-                    <a href="{{ route('trabalho.index')}}" class="btn btn-primary">Retornar</a>
-                </div>
+@extends('layout')
 
-                @if ($errors ->any())
-                
-                    <ul>
-                        @foreach($errors ->all() as $error )
-                            <li>{{ $error}}</li>
-                        @endforeach
-                    </ul>   
+@section('conteudo')
+<div class="mb-3">
+    <h4>Nova Tarefa</h4>
+    <p class="text-muted">Preencha as informações abaixo.</p>
+</div>
 
-                @endif
+<form action="{{ route('trabalho.store') }}" method="POST">
+    @csrf
 
+    <div class="mb-3">
+        <label for="name" class="form-label">Nome da Tarefa</label>
+        <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name') }}" placeholder="Ex: Estudar Laravel">
+        @error('name')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
 
-                <form action="{{ route('trabalho.store') }}" method="POST">
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="priority" class="form-label">Prioridade</label>
+            <select class="form-select @error('priority') is-invalid @enderror" id="priority" name="priority">
+                <option value="baixa" {{ old('priority') == 'baixa' ? 'selected' : '' }}>Baixa</option>
+                <option value="media" {{ old('priority') == 'media' ? 'selected' : '' }}>Média</option>
+                <option value="alta" {{ old('priority') == 'alta' ? 'selected' : '' }}>Alta</option>
+            </select>
+            @error('priority')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
 
-                    @csrf
-                
-                <div class="form-group mt-3">
-                    <label for="name">Nome da Tarefa</label>
-                    <input type="text" id="name" name="name" class="form-control">
-                
-                </div>
-                
-                <div class="form-group mt-3">
-                    <label for="descricao">Descrição da Tarefa</label>
-                    <input type="text" id="descricao" name="description" class="form-control">
-                
-                </div>
-                
-                <div class="form-group mt-3">
-                    <button class="btn btn-primary">Adicionar Tarefa</button>
-            
-                </div>
-
-
-                </form>
-
-
-                
-            </div>
+        <div class="col-md-6 mb-3">
+            <label for="due_date" class="form-label">Prazo de Entrega</label>
+            <input type="date" class="form-control @error('due_date') is-invalid @enderror" id="due_date" name="due_date" value="{{ old('due_date') }}">
+            @error('due_date')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+    <div class="mb-3">
+        <label for="description" class="form-label">Descrição</label>
+        <textarea class="form-control @error('description') is-invalid @enderror" id="description" name="description" rows="4">{{ old('description') }}</textarea>
+        @error('description')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+
+    <hr>
     
-</body>
-</html>
+    <div class="d-flex justify-content-end gap-2">
+        <a href="{{ route('trabalho.index') }}" class="btn btn-secondary">Cancelar</a>
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-save"></i> Salvar Tarefa
+        </button>
+    </div>
+</form>
+@endsection
+
