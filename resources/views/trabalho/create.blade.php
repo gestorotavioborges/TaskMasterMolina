@@ -18,7 +18,22 @@
     </div>
 
     <div class="row">
-        <div class="col-md-6 mb-3">
+        <div class="col-md-4 mb-3">
+            <label for="category_id" class="form-label">Categoria</label>
+            <select class="form-select @error('category_id') is-invalid @enderror" id="category_id" name="category_id">
+                <option value="" selected disabled>Selecione...</option>
+                @foreach($categories as $category)
+                    <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                        {{ $category->name }}
+                    </option>
+                @endforeach
+            </select>
+            @error('category_id')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+
+        <div class="col-md-4 mb-3">
             <label for="priority" class="form-label">Prioridade</label>
             <select class="form-select @error('priority') is-invalid @enderror" id="priority" name="priority">
                 <option value="baixa" {{ old('priority') == 'baixa' ? 'selected' : '' }}>Baixa</option>
@@ -30,7 +45,7 @@
             @enderror
         </div>
 
-        <div class="col-md-6 mb-3">
+        <div class="col-md-4 mb-3">
             <label for="due_date" class="form-label">Prazo de Entrega</label>
             <input type="date" class="form-control @error('due_date') is-invalid @enderror" id="due_date" name="due_date" value="{{ old('due_date') }}">
             @error('due_date')
@@ -56,5 +71,6 @@
         </button>
     </div>
 </form>
-@endsection
+@endsection 
+
 

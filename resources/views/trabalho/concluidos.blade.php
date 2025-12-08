@@ -13,6 +13,7 @@
         <table class="table table-hover align-middle">
             <thead class="table-light">
                 <tr>
+                    <th>Categoria</th>
                     <th>Tarefa</th>
                     <th>Concluída em</th>
                     <th class="text-end">Ações</th>
@@ -21,6 +22,11 @@
             <tbody>
                 @foreach($trabalhos as $t)
                 <tr class="table-success opacity-75">
+                    <td>
+                        <span class="badge bg-{{ $t->category->color ?? 'secondary' }}">
+                            {{ $t->category->name ?? 'Geral' }}
+                        </span>
+                    </td>
                     <td class="text-decoration-line-through">{{ $t->name }}</td>
                     <td>{{ $t->updated_at->format('d/m/Y H:i') }}</td>
                     <td class="text-end">

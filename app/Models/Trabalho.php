@@ -14,11 +14,23 @@ class Trabalho extends Model
         'description',
         'is_done',
         'priority',
-        'due_date'
+        'due_date',
+        'category_id'
     ];
 
     protected $casts = [
         'is_done' => 'boolean',
         'due_date' => 'date'
     ];
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    // Nova relação: Uma tarefa tem muitos comentários
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
 }

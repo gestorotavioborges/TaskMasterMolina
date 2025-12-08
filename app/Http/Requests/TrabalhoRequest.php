@@ -17,7 +17,8 @@ class TrabalhoRequest extends FormRequest
             'name' => 'required|string|min:3',
             'description' => 'required|string|min:5',
             'priority' => 'required|in:baixa,media,alta',
-            'due_date' => 'required|date'
+            'due_date' => 'required|date',
+            'category_id' => 'required|exists:categories,id'
         ];
     }
 
@@ -30,7 +31,9 @@ class TrabalhoRequest extends FormRequest
             'description.min' => "A descrição precisa ter no mínimo :min caracteres.",
             'priority.required' => "Selecione uma prioridade.",
             'due_date.required' => "Defina uma data de entrega.",
-            'due_date.date' => "Formato de data inválido."
+            'due_date.date' => "Formato de data inválido.",
+            'category_id.required' => "Selecione uma categoria.",
+            'category_id.exists' => "Categoria inválida."
         ];
     }
 }

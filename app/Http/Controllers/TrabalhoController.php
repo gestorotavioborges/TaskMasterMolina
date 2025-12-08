@@ -3,29 +3,45 @@
 namespace App\Http\Controllers;
 
 use App\Models\Trabalho;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use App\Http\Requests\TrabalhoRequest;
 
 class TrabalhoController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $trabalho = Trabalho::where('is_done', false)
-            ->orderBy('due_date', 'asc')
-            ->get();
+        $categories = Category::all();
+
+        $query = Trabalho::with('category')
+            ->where('is_done', false);
+
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        $trabalho = $query->orderBy('due_date', 'asc')->get();
         
-        return view('trabalho.index', ['trabalhos' => $trabalho]);
+        return view('trabalho.index', [
+            'trabalhos' => $trabalho, 
+            'categories' => $categories,
+            'filtroAtual' => $request->category_id
+        ]);
     }
 
     public function concluidos()
     {
-        $trabalho = Trabalho::where('is_done', true)->get();
+        $trabalho = Trabalho::with('category')
+            ->where('is_done', true)
+            ->get();
+            
         return view('trabalho.concluidos', ['trabalhos' => $trabalho]);
     }
 
     public function create()
     {
-        return view('trabalho.create');
+        $categories = Category::all();
+        return view('trabalho.create', compact('categories'));
     }
 
     public function store(TrabalhoRequest $request)
@@ -35,6 +51,7 @@ class TrabalhoController extends Controller
             'description' => $request['description'],
             'priority' => $request['priority'],
             'due_date' => $request['due_date'],
+            'category_id' => $request['category_id'],
             'is_done' => false
         ]);
 
@@ -48,7 +65,9 @@ class TrabalhoController extends Controller
     public function edit($id)
     {
         $trabalho = Trabalho::findOrFail($id);
-        return view('trabalho.update', ['trabalho' => $trabalho]);
+        $categories = Category::all();
+        
+        return view('trabalho.update', compact('trabalho', 'categories'));
     }
 
     public function update(TrabalhoRequest $request, $id)
@@ -59,7 +78,8 @@ class TrabalhoController extends Controller
             'name' => $request['name'],
             'description' => $request['description'],
             'priority' => $request['priority'],
-            'due_date' => $request['due_date']
+            'due_date' => $request['due_date'],
+            'category_id' => $request['category_id']
         ]);
 
         if($atualizou) {
